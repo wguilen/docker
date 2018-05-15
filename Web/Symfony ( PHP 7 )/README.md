@@ -1,5 +1,4 @@
-Symfony ( PHP 7 )
----
+# Symfony ( PHP 7 )
 
 **Compose** file containing:
 - MongoDB instance;
