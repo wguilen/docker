@@ -1,0 +1,54 @@
+version: "3"
+
+services:
+
+  # MongoDB
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    networks:
+      app_nw:
+        ipv4_address: 172.16.238.8
+    volumes:
+      - ./data/mongodb:/data/db
+
+  # PostgreSQL (with PostGIS)
+  postgresql:
+    image: mdillon/postgis:latest
+    container_name: postgresql
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      app_nw:
+        ipv4_address: 172.16.238.9
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data/postgresql:/var/lib/postgresql/data
+
+  # Apache2 with PHP7.2.2
+  web:
+    build:
+      context: ./php7.2.2
+    container_name: web
+    depends_on:
+      - mongodb
+      - postgresql
+    networks:
+      app_nw:
+        ipv4_address: 172.16.238.10
+    ports:
+      - "80:80"
+    volumes:
+      - ./php7.2.2/apache.conf:/etc/apache2/sites-enabled/app.conf
+      - ./php7.2.2/php.ini-development:/usr/local/etc/php/php.ini
+      - ./app/:/var/www/html/app/
+
+networks:
+  app_nw:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        -
+          subnet: 172.16.238.0/24
