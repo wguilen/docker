@@ -1,0 +1,39 @@
+version: '3.3'
+
+services:
+
+    db:
+        image: mysql:5.7
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: root_password
+            MYSQL_DATABASE: wp_db
+            MYSQL_USER: wp_user
+            MYSQL_PASSWORD: wp_password
+        volumes:
+            - ./data/mysql:/var/lib/mysql
+
+    wordpress:
+        image: wordpress:php7.1
+        restart: unless-stopped
+        depends_on:
+            - db
+        environment:
+            WORDPRESS_DB_HOST: db:3306
+            WORDPRESS_DB_NAME: wp_db
+            WORDPRESS_DB_USER: wp_user
+            WORDPRESS_DB_PASSWORD: wp_password
+        ports:
+            - "8000:80"
+        volumes:
+            - ./src:/var/www/html
+            - ./conf/conf.d/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin:latest
+        ports:
+            - 8181:80
+        environment:
+            MYSQL_USERNAME: root
+            MYSQL_ROOT_PASSWORD: root_password
+            PMA_HOST: db
